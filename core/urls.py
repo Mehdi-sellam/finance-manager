@@ -16,43 +16,37 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
+from rest_framework_nested import routers as nested_routers
 
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/accounts/', include('accounts.urls')),
-    path('api/users/', include('users.urls')),
-    path('api/projects/', include('projects.urls')),
-    path('api/finance/', include('finance.urls')),
-]
-
-
-
-
-# swager view
-
-schema_view = get_schema_view(
-   openapi.Info(
-      title="Finance Manager API",
-      default_version='v1',
-      description="API documentation for Finance Manager",
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
+# Import viewsets
+from projects.views import ProjectViewSet
+from finance.views import (
+    ExpenseViewSet, SalaryPaymentViewSet,
+    ResourceConsumptionViewSet, BudgetViewSet
 )
+from users.views import UserViewSet
+from accounts.views import BusinessOwnerViewSet
+
+# Base Router
+router = routers.DefaultRouter()
+router.register(r'projects', ProjectViewSet, basename='projects')
+router.register(r'users', UserViewSet, basename='users')
+router.register(r'owners', BusinessOwnerViewSet, basename='owners')
+
+# Nested Router → /projects/<id>/
+projects_router = nested_routers.NestedSimpleRouter(router, r'projects', lookup='project')
+projects_router.register(r'expenses', ExpenseViewSet, basename='project-expenses')
+projects_router.register(r'salaries', SalaryPaymentViewSet, basename='project-salaries')
+projects_router.register(r'budgets', BudgetViewSet, basename='project-budget')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/accounts/', include('accounts.urls')),
-    path('api/projects/', include('projects.urls')),
-    path('api/finance/', include('finance.urls')),
-    path('api/users/', include('users.urls')), 
 
-    # Swagger endpoints
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    # API endpoints
+    path('api/', include(router.urls)),
+    path('api/', include(projects_router.urls)),
+
+    # Swagger
+    path('', include('swagger.urls')),
 ]
