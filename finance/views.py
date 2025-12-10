@@ -8,6 +8,7 @@ from .serializers import (
     BudgetSerializer
 )
 from .filters import ExpenseFilter, ResourceConsumptionFilter, SalaryPaymentFilter, BudgetFilter
+from .permissions import IsOwnerOrAdmin, IsEmployeeOrAdmin, IsOwnerEmployeeOrAdmin
 
 # ----------------------
 # Finance ViewSets
@@ -20,6 +21,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     filterset_class = ExpenseFilter
     search_fields = ["title"]
     ordering_fields = ["date", "amount"]
+    permission_classes = [IsOwnerEmployeeOrAdmin]
 
 
 class ResourceConsumptionViewSet(viewsets.ModelViewSet):
@@ -29,6 +31,7 @@ class ResourceConsumptionViewSet(viewsets.ModelViewSet):
     filterset_class = ResourceConsumptionFilter
     search_fields = ["resource_name"]
     ordering_fields = ["quantity", "cost_per_unit"]
+    permission_classes = [IsOwnerEmployeeOrAdmin]  # added
 
 
 class SalaryPaymentViewSet(viewsets.ModelViewSet):
@@ -36,8 +39,9 @@ class SalaryPaymentViewSet(viewsets.ModelViewSet):
     serializer_class = SalaryPaymentSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = SalaryPaymentFilter
-    search_fields = ["employee__name"]  # use related field lookup
+    search_fields = ["employee__name"]
     ordering_fields = ["date", "amount"]
+    permission_classes = [IsOwnerEmployeeOrAdmin]  # added
 
 
 class BudgetViewSet(viewsets.ModelViewSet):
@@ -47,3 +51,5 @@ class BudgetViewSet(viewsets.ModelViewSet):
     filterset_class = BudgetFilter
     search_fields = ["project__name"]
     ordering_fields = ["total_amount", "created_at"]
+    permission_classes = [IsOwnerOrAdmin]
+

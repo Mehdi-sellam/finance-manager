@@ -5,7 +5,9 @@ from drf_yasg import openapi
 from rest_framework import viewsets
 from .models import BusinessOwner
 from .serializers import BusinessOwnerSerializer
-
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -27,4 +29,15 @@ class TestView(APIView):
 class BusinessOwnerViewSet(viewsets.ModelViewSet):
     queryset = BusinessOwner.objects.all()
     serializer_class = BusinessOwnerSerializer
+
+
+
+
+class LogoutView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        request.user.auth_token.delete()  # remove the token
+        return Response({"detail": "Logged out successfully"}, status=status.HTTP_200_OK)
 
