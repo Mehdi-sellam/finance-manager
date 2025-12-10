@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # third-party apps
     'rest_framework',
     'drf_yasg', 
+    'django_filters',
 
     # your apps
     'accounts',

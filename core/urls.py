@@ -1,23 +1,11 @@
-"""
-URL configuration for core project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+# core/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from rest_framework_nested import routers as nested_routers
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
 
 # Import viewsets
 from projects.views import ProjectViewSet
@@ -28,25 +16,40 @@ from finance.views import (
 from users.views import UserViewSet
 from accounts.views import BusinessOwnerViewSet
 
-# Base Router
+# Routers setup (same as before)
 router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet, basename='projects')
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'owners', BusinessOwnerViewSet, basename='owners')
 
-# Nested Router → /projects/<id>/
+router.register(r'expenses', ExpenseViewSet, basename='expenses')
+router.register(r'salaries', SalaryPaymentViewSet, basename='salaries')
+router.register(r'resources', ResourceConsumptionViewSet, basename='resources')
+router.register(r'budgets', BudgetViewSet, basename='budgets')
+
 projects_router = nested_routers.NestedSimpleRouter(router, r'projects', lookup='project')
 projects_router.register(r'expenses', ExpenseViewSet, basename='project-expenses')
 projects_router.register(r'salaries', SalaryPaymentViewSet, basename='project-salaries')
-projects_router.register(r'budgets', BudgetViewSet, basename='project-budget')
+projects_router.register(r'budgets', BudgetViewSet, basename='project-budgets')
+projects_router.register(r'resources', ResourceConsumptionViewSet, basename='project-resources')
+
+# Swagger setup
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Finance Manager API",
+        default_version='v1',
+        description="API documentation for Finance Manager",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # API endpoints
     path('api/', include(router.urls)),
     path('api/', include(projects_router.urls)),
 
-    # Swagger
-    path('', include('swagger.urls')),
+    # Swagger UI
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
