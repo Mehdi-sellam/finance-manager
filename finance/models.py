@@ -3,11 +3,8 @@ from projects.models import Project
 from users.models import Employee
 from accounts.models import BusinessOwner
 
-# Create your models here.
-
-
 class Expense(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="expenses")
     title = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
@@ -17,8 +14,8 @@ class Expense(models.Model):
 
 
 class SalaryPayment(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="salary_payments")
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name="salary_payments")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
 
@@ -27,7 +24,7 @@ class SalaryPayment(models.Model):
 
 
 class OwnerSalary(models.Model):
-    owner = models.ForeignKey(BusinessOwner, on_delete=models.CASCADE)
+    owner = models.ForeignKey(BusinessOwner, on_delete=models.CASCADE, related_name="owner_salaries")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
 
@@ -48,12 +45,9 @@ class ResourceConsumption(models.Model):
     def __str__(self):
         return f"{self.resource_name} for {self.expense.title}"
 
+
 class Budget(models.Model):
-    project = models.OneToOneField(
-        Project,
-        on_delete=models.CASCADE,
-        related_name='project_budget'  # ✅ avoids clash
-    )
+    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='project_budget')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateField(auto_now_add=True)
 

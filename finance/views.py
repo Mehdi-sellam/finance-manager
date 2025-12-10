@@ -7,6 +7,7 @@ from .serializers import (
     SalaryPaymentSerializer,
     BudgetSerializer
 )
+from .filters import ExpenseFilter, ResourceConsumptionFilter, SalaryPaymentFilter, BudgetFilter
 
 # ----------------------
 # Finance ViewSets
@@ -16,7 +17,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ["id", "title", "date", "project", "amount"]  # match model fields
+    filterset_class = ExpenseFilter
     search_fields = ["title"]
     ordering_fields = ["date", "amount"]
 
@@ -25,17 +26,17 @@ class ResourceConsumptionViewSet(viewsets.ModelViewSet):
     queryset = ResourceConsumption.objects.all()
     serializer_class = ResourceConsumptionSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ["id", "resource_type", "date", "amount", "project"]
-    search_fields = ["resource_type"]
-    ordering_fields = ["date", "amount"]
+    filterset_class = ResourceConsumptionFilter
+    search_fields = ["resource_name"]
+    ordering_fields = ["quantity", "cost_per_unit"]
 
 
 class SalaryPaymentViewSet(viewsets.ModelViewSet):
     queryset = SalaryPayment.objects.all()
     serializer_class = SalaryPaymentSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ["id", "employee", "date", "amount", "project"]
-    search_fields = ["employee"]
+    filterset_class = SalaryPaymentFilter
+    search_fields = ["employee__name"]  # use related field lookup
     ordering_fields = ["date", "amount"]
 
 
@@ -43,6 +44,6 @@ class BudgetViewSet(viewsets.ModelViewSet):
     queryset = Budget.objects.all()
     serializer_class = BudgetSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ["id", "total_amount", "project"]
-    search_fields = ["total_amount"]
-    ordering_fields = ["total_amount"]
+    filterset_class = BudgetFilter
+    search_fields = ["project__name"]
+    ordering_fields = ["total_amount", "created_at"]
