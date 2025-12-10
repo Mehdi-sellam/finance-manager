@@ -33,11 +33,26 @@ class BusinessOwnerViewSet(viewsets.ModelViewSet):
 
 
 
+class LoginView(APIView):
+    """
+    POST username & password → returns auth token
+    """
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key, "user": {"id": user.id, "username": user.username}})
+        return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
 class LogoutView(APIView):
+    """
+    POST with token → deletes token
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        request.user.auth_token.delete()  # remove the token
-        return Response({"detail": "Logged out successfully"}, status=status.HTTP_200_OK)
-
+        request.user.auth_token.delete()
+        return Response({"success": "Logged out"}, status=status.HTTP_200_OK)

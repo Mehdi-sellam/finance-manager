@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'drf_yasg', 
     'django_filters',
     'rest_framework.authtoken',
+    'corsheaders',
 
     # your apps
     'accounts',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # must be first
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,4 +147,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
+
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
 }
+
+# CORS settings - for local testing only. Do NOT enable in production without review.
+CORS_ALLOW_ALL_ORIGINS = True
