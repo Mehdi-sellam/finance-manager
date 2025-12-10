@@ -1,4 +1,3 @@
-# core/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
@@ -16,7 +15,7 @@ from finance.views import (
 from users.views import UserViewSet
 from accounts.views import BusinessOwnerViewSet
 
-# Routers setup (same as before)
+# Routers setup
 router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet, basename='projects')
 router.register(r'users', UserViewSet, basename='users')
@@ -50,8 +49,6 @@ urlpatterns = [
     path('api/', include(projects_router.urls)),
     path('api/auth/', include('accounts.urls')),
 
-
-    # Swagger UI
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

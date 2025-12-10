@@ -1,3 +1,4 @@
+# finance/views.py
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Expense, ResourceConsumption, SalaryPayment, Budget
@@ -10,10 +11,6 @@ from .serializers import (
 from .filters import ExpenseFilter, ResourceConsumptionFilter, SalaryPaymentFilter, BudgetFilter
 from .permissions import IsOwnerOrAdmin, IsEmployeeOrAdmin, IsOwnerEmployeeOrAdmin
 
-# ----------------------
-# Finance ViewSets
-# ----------------------
-
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
@@ -21,8 +18,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     filterset_class = ExpenseFilter
     search_fields = ["title"]
     ordering_fields = ["date", "amount"]
-    permission_classes = [IsOwnerEmployeeOrAdmin]
-
+    permission_classes = [IsOwnerEmployeeOrAdmin]  # FIX: correct attribute name
 
 class ResourceConsumptionViewSet(viewsets.ModelViewSet):
     queryset = ResourceConsumption.objects.all()
@@ -31,8 +27,7 @@ class ResourceConsumptionViewSet(viewsets.ModelViewSet):
     filterset_class = ResourceConsumptionFilter
     search_fields = ["resource_name"]
     ordering_fields = ["quantity", "cost_per_unit"]
-    permission_classes = [IsOwnerEmployeeOrAdmin]  # added
-
+    permission_classes = [IsOwnerEmployeeOrAdmin]
 
 class SalaryPaymentViewSet(viewsets.ModelViewSet):
     queryset = SalaryPayment.objects.all()
@@ -41,8 +36,7 @@ class SalaryPaymentViewSet(viewsets.ModelViewSet):
     filterset_class = SalaryPaymentFilter
     search_fields = ["employee__name"]
     ordering_fields = ["date", "amount"]
-    permission_classes = [IsOwnerEmployeeOrAdmin]  # added
-
+    permission_classes = [IsOwnerEmployeeOrAdmin]
 
 class BudgetViewSet(viewsets.ModelViewSet):
     queryset = Budget.objects.all()
@@ -52,4 +46,3 @@ class BudgetViewSet(viewsets.ModelViewSet):
     search_fields = ["project__name"]
     ordering_fields = ["total_amount", "created_at"]
     permission_classes = [IsOwnerOrAdmin]
-
