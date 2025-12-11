@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -53,13 +53,10 @@ INSTALLED_APPS = [
     'users',
     'projects',
     'finance',
-    'corsheaders',
-
 ]
 
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # must be first
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -67,8 +64,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -161,5 +156,3 @@ REST_FRAMEWORK = {
     ),
 }
 
-# CORS settings - for local testing only. Do NOT enable in production without review.
-CORS_ALLOW_ALL_ORIGINS = True
