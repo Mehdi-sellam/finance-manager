@@ -9,7 +9,8 @@ from .serializers import (
     BudgetSerializer
 )
 from .filters import ExpenseFilter, ResourceConsumptionFilter, SalaryPaymentFilter, BudgetFilter
-from .permissions import IsOwnerOrAdmin, IsEmployeeOrAdmin, IsOwnerEmployeeOrAdmin
+
+from accounts.permissions import IsOwnerOrAdmin, IsEmployeeOrAdmin, IsOwnerEmployeeOrAdmin
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all()
