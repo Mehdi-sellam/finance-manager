@@ -44,3 +44,25 @@ I can set up:
 🔐 Permission logic (owners, employees, admin)
 
 Just say “Yes, continue to Step 10”.
+
+
+
+{
+    "projects": "http://127.0.0.1:8000/api/projects/",
+    "users": "http://127.0.0.1:8000/api/users/",
+    "owners": "http://127.0.0.1:8000/api/auth/owners/",
+    "expenses": "http://127.0.0.1:8000/api/expenses/",
+    "salaries": "http://127.0.0.1:8000/api/salaries/",
+    "resources": "http://127.0.0.1:8000/api/resources/",
+    "budgets": "http://127.0.0.1:8000/api/budgets/"
+}
+
+
+
+superuser access API Token:
+
+{
+    "token": "82a9a501db110bb071dc302a530d27d97c047b78",
+    "username": "sellam"
+}
+
