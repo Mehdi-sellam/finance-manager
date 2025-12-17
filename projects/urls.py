@@ -1,10 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ProjectViewSet
-
-router = DefaultRouter()
-router.register(r'projects', ProjectViewSet)
+from django.urls import path
+from .views import AssignEmployeeToProjectView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("assign-employee/", AssignEmployeeToProjectView.as_view(), name="assign-employee"),
 ]

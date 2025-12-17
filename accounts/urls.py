@@ -2,6 +2,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import BusinessOwnerViewSet, LoginView, LogoutView, RegisterView
+from .views import AssignBusinessOwnerView
 
 router = DefaultRouter()
 router.register(r'owners', BusinessOwnerViewSet, basename='owners')
@@ -14,6 +15,10 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
 
+    # assign owner role
+    path("assign-owner/", AssignBusinessOwnerView.as_view()),
+
     # viewsets (owners)
     path('', include(router.urls)),
+    
 ]

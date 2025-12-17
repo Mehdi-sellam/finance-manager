@@ -17,7 +17,28 @@ INSTALLED_APPS = [
 ]
 
 
+from django.db import models
+from accounts.models import BusinessOwner
 
+# Create your models here.
+
+
+class Employee(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(BusinessOwner, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    role = models.CharField(max_length=255)
+    monthly_salary = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.user.username} ({self.owner.company_name})"
+
+{
+  "amount": 3000,
+  "date": "2022-03-03",
+  "employee": 2,
+  "project": 1
+}
 
 
 🎉 That's it — Steps 12 & 13 are fully implemented!
@@ -62,7 +83,7 @@ Just say “Yes, continue to Step 10”.
 superuser access API Token:
 
 {
-    "token": "82a9a501db110bb071dc302a530d27d97c047b78",
+    token 82a9a501db110bb071dc302a530d27d97c047b78
     "username": "sellam"
 }
 

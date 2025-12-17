@@ -4,10 +4,13 @@ from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.authtoken.models import Token
 from .models import BusinessOwner
 from .serializers import BusinessOwnerSerializer  # adapt path/name if different
+
+
+
 
 class RegisterView(APIView):
     """
@@ -74,3 +77,52 @@ class BusinessOwnerViewSet(viewsets.ModelViewSet):
     queryset = BusinessOwner.objects.all()
     serializer_class = BusinessOwnerSerializer
     # Add appropriate permission_classes as needed (e.g., IsAdminUser or custom)
+
+
+
+
+
+
+
+class AssignBusinessOwnerView(APIView):
+    """
+    Admin assigns BusinessOwner role to an existing user
+    """
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        user_id = request.data.get("user_id")
+        company_name = request.data.get("company_name")
+
+        if not user_id or not company_name:
+            return Response(
+                {"error": "user_id and company_name are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if hasattr(user, "businessowner"):
+            return Response(
+                {"error": "User is already a BusinessOwner"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        BusinessOwner.objects.create(
+            user=user,
+            company_name=company_name
+        )
+
+        return Response(
+            {
+                "message": "BusinessOwner role assigned",
+                "username": user.username
+            },
+            status=status.HTTP_201_CREATED
+        )
