@@ -50,9 +50,7 @@ INSTALLED_APPS = [
 
     # your apps
     'accounts',
-    'users',
-    'projects',
-    'finance',
+
 ]
 
 

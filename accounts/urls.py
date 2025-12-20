@@ -1,24 +1,7 @@
-# accounts/urls.py
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import BusinessOwnerViewSet, LoginView, LogoutView, RegisterView
-from .views import AssignBusinessOwnerView
-
-router = DefaultRouter()
-router.register(r'owners', BusinessOwnerViewSet, basename='owners')
+from django.urls import path
+from .views import ChangePasseordView, CreateUserView
 
 urlpatterns = [
-
-
-    # auth endpoints
-    path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
-    path('register/', RegisterView.as_view(), name='register'),
-
-    # assign owner role
-    path("assign-owner/", AssignBusinessOwnerView.as_view()),
-
-    # viewsets (owners)
-    path('', include(router.urls)),
-    
+    path("create-user/", CreateUserView.as_view()),
+    path("change-password/", ChangePasseordView.as_view()),
 ]
