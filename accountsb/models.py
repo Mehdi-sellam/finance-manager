@@ -1,5 +1,4 @@
 from django.db import models
-<<<<<<< HEAD
 from django.contrib.auth.models import User
 from namespace.models import Namespace
 
