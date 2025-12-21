@@ -54,6 +54,11 @@ urlpatterns = [
     # Added by AI - Namespace endpoints
     path("api/namespaces/", include("namespace.urls")),
 
+    # Added by AI - New Financial Apps
+    path("api/accountsb/", include("accountsb.urls")),
+    path("api/conversion-rates/", include("conversion_rates.urls")),
+    path("api/transactions/", include("transactions.urls")),
+
 
 
     # API documentation

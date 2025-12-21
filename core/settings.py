@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     # your apps
     'accounts',
     'namespace',
+    'accountsb',
+    'conversion_rates',
+    'transactions',
 
 ]
 
