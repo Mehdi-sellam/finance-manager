@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
     # your apps
     'accounts',
+    'namespace',
 
 ]
 
