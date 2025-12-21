@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework import routers
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
 from rest_framework import permissions
 
 
@@ -10,7 +11,24 @@ from rest_framework import permissions
 router = routers.DefaultRouter()
 
 
+# Added by AI - Custom schema generator to include Token Authentication security scheme
+class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
+    def get_schema(self, request=None, public=False):
+        schema = super().get_schema(request, public)
+        # Added by AI - Add security definitions for Token Authentication
+        schema.security_definitions = {
+            'Token': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header',
+                'description': 'Token-based authentication. Format: Token <your-token-here>'
+            }
+        }
+        return schema
+
+
 # Swagger / OpenAPI schema
+# Added by AI - Configure schema with custom generator for Token Authentication
 schema_view = get_schema_view(
     openapi.Info(
         title="Finance Manager API",
@@ -19,6 +37,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
+    generator_class=CustomOpenAPISchemaGenerator,
 )
 
 
@@ -31,6 +50,9 @@ urlpatterns = [
 
     # Auth / accounts
     path("api/auth/", include("accounts.urls")),
+    
+    # Added by AI - Namespace endpoints
+    path("api/namespaces/", include("namespace.urls")),
 
 
 
