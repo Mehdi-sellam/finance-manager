@@ -57,7 +57,7 @@ class AccountTests(APITestCase):
     def test_retrieve_account_by_name(self):
         Account.objects.create(user=self.user, namespace=self.namespace, name="Target Account", currency="USD")
         
-        data = {"account_name": "Target Account"}
+        data = {"namespace_name": "personal", "account_name": "Target Account"}
         response = self.client.post(self.retrieve_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], "Target Account")
@@ -67,7 +67,7 @@ class AccountTests(APITestCase):
         
         # Update name
         data = {"name": "New Name"}
-        response = self.client.patch(f"{self.update_url}?account_name=Old Name", data)
+        response = self.client.patch(f"{self.update_url}?namespace_name=personal&account_name=Old Name", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(Account.objects.filter(name="New Name").exists())
         self.assertFalse(Account.objects.filter(name="Old Name").exists())
@@ -75,7 +75,7 @@ class AccountTests(APITestCase):
     def test_delete_account(self):
         Account.objects.create(user=self.user, namespace=self.namespace, name="To Delete", currency="USD")
         
-        response = self.client.delete(f"{self.delete_url}?account_name=To Delete")
+        response = self.client.delete(f"{self.delete_url}?namespace_name=personal&account_name=To Delete")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Account.objects.count(), 0)
 

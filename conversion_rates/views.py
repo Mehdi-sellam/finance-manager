@@ -17,7 +17,6 @@ from .services import (
 )
 
 
-# Added by AI - View for creating conversion rates
 class CreateConversionRateView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -33,7 +32,6 @@ class CreateConversionRateView(APIView):
         serializer = ConversionRateCreateSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Create rate
                 rate = create_conversion_rate(
                     user=request.user,
                     **serializer.validated_data
@@ -44,7 +42,6 @@ class CreateConversionRateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - View for listing conversion rates
 class ListConversionRatesView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -56,12 +53,10 @@ class ListConversionRatesView(APIView):
         security=[{"Token": []}]
     )
     def get(self, request):
-        # Added by AI - Retrieve rates
         rates = list_conversion_rates(request.user)
         return Response(ConversionRateSerializer(rates, many=True).data, status=status.HTTP_200_OK)
 
 
-# Added by AI - View for updating conversion rates
 class UpdateConversionRateView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -87,7 +82,6 @@ class UpdateConversionRateView(APIView):
         serializer = ConversionRateUpdateSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Update rate
                 rate = update_conversion_rate(
                     user=request.user,
                     from_currency=from_currency,
@@ -100,13 +94,12 @@ class UpdateConversionRateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - View for deleting conversion rates
 class DeleteConversionRateView(APIView):
     permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_summary="Delete conversion rate",
-        operation_description="Remove an exchange rate definition",
+        operation_description="Remove an exchange rate",
         manual_parameters=[
             openapi.Parameter('from_currency', openapi.IN_QUERY, description="From Currency", type=openapi.TYPE_STRING, required=True),
             openapi.Parameter('to_currency', openapi.IN_QUERY, description="To Currency", type=openapi.TYPE_STRING, required=True)
@@ -123,7 +116,6 @@ class DeleteConversionRateView(APIView):
             return Response({"error": "from_currency and to_currency query parameters are required"}, status=status.HTTP_400_BAD_REQUEST)
             
         try:
-            # Added by AI - Delete rate
             delete_conversion_rate(request.user, from_currency, to_currency)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:

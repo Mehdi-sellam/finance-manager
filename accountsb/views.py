@@ -21,7 +21,6 @@ from .services import (
 )
 
 
-# Added by AI - View for creating new accounts
 class CreateAccountView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -37,7 +36,6 @@ class CreateAccountView(APIView):
         serializer = AccountCreateSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Call service to create account
                 account = create_account(
                     user=request.user,
                     namespace_name=serializer.validated_data['namespace_name'],
@@ -46,12 +44,10 @@ class CreateAccountView(APIView):
                 )
                 return Response(AccountSerializer(account).data, status=status.HTTP_201_CREATED)
             except Exception as e:
-                # Added by AI - Handle business logic errors
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - View for listing all accounts
 class ListAccountsView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -63,18 +59,16 @@ class ListAccountsView(APIView):
         security=[{"Token": []}]
     )
     def get(self, request):
-        # Added by AI - Retrieve accounts via service
         accounts = list_accounts(request.user)
         return Response(AccountSerializer(accounts, many=True).data, status=status.HTTP_200_OK)
 
 
-# Added by AI - View for retrieving a single account by name
 class RetrieveAccountByNameView(APIView):
     permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_summary="Retrieve account by name",
-        operation_description="Get details of a specific account by its unique name",
+        operation_description="Get details of a specific account by its unique name within a namespace",
         request_body=AccountRetrieveByNameSerializer,
         responses={200: AccountSerializer},
         tags=["Accounts"],
@@ -84,23 +78,26 @@ class RetrieveAccountByNameView(APIView):
         serializer = AccountRetrieveByNameSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Get account details
-                account = get_account_by_name(request.user, serializer.validated_data['account_name'])
+                account = get_account_by_name(
+                    user=request.user,
+                    namespace_name=serializer.validated_data['namespace_name'],
+                    name=serializer.validated_data['account_name']
+                )
                 return Response(AccountSerializer(account).data, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - View for updating an account
 class UpdateAccountView(APIView):
     permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_summary="Update account",
-        operation_description="Update account details (e.g., rename) by current name",
+        operation_description="Update account details (e.g., rename) by current name and namespace",
         request_body=AccountUpdateSerializer,
         manual_parameters=[
+            openapi.Parameter('namespace_name', openapi.IN_QUERY, description="Namespace Name", type=openapi.TYPE_STRING, required=True),
             openapi.Parameter('account_name', openapi.IN_QUERY, description="Current Account Name", type=openapi.TYPE_STRING, required=True)
         ],
         responses={200: AccountSerializer},
@@ -108,16 +105,20 @@ class UpdateAccountView(APIView):
         security=[{"Token": []}]
     )
     def patch(self, request):
+        namespace_name = request.query_params.get('namespace_name')
         account_name = request.query_params.get('account_name')
+        
+        if not namespace_name:
+            return Response({"error": "namespace_name query parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
         if not account_name:
             return Response({"error": "account_name query parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = AccountUpdateSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Update account logic
                 account = update_account(
                     user=request.user,
+                    namespace_name=namespace_name,
                     current_name=account_name,
                     new_name=serializer.validated_data.get('name')
                 )
@@ -127,14 +128,14 @@ class UpdateAccountView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - View for deleting an account
 class DeleteAccountView(APIView):
     permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_summary="Delete account",
-        operation_description="Permanently remove an account by name",
+        operation_description="Permanently remove an account by name and namespace",
         manual_parameters=[
+            openapi.Parameter('namespace_name', openapi.IN_QUERY, description="Namespace Name", type=openapi.TYPE_STRING, required=True),
             openapi.Parameter('account_name', openapi.IN_QUERY, description="Account Name", type=openapi.TYPE_STRING, required=True)
         ],
         responses={204: "No Content"},
@@ -142,19 +143,21 @@ class DeleteAccountView(APIView):
         security=[{"Token": []}]
     )
     def delete(self, request):
+        namespace_name = request.query_params.get('namespace_name')
         account_name = request.query_params.get('account_name')
+        
+        if not namespace_name:
+            return Response({"error": "namespace_name query parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
         if not account_name:
             return Response({"error": "account_name query parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
             
         try:
-            # Added by AI - Delete account via service
-            delete_account(request.user, account_name)
+            delete_account(request.user, namespace_name, account_name)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - View for listing accounts in a namespace
 class ListAccountsByNamespaceView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -170,7 +173,6 @@ class ListAccountsByNamespaceView(APIView):
         serializer = AccountListByNamespaceSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - List accounts in namespace
                 accounts = list_accounts_by_namespace(request.user, serializer.validated_data['namespace_name'])
                 return Response(AccountSerializer(accounts, many=True).data, status=status.HTTP_200_OK)
             except Exception as e:

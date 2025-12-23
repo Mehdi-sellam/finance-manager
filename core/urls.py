@@ -11,11 +11,9 @@ from rest_framework import permissions
 router = routers.DefaultRouter()
 
 
-# Added by AI - Custom schema generator to include Token Authentication security scheme
 class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-        # Added by AI - Add security definitions for Token Authentication
         schema.security_definitions = {
             'Token': {
                 'type': 'apiKey',
@@ -28,7 +26,6 @@ class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
 
 
 # Swagger / OpenAPI schema
-# Added by AI - Configure schema with custom generator for Token Authentication
 schema_view = get_schema_view(
     openapi.Info(
         title="Finance Manager API",
@@ -51,10 +48,10 @@ urlpatterns = [
     # Auth / accounts
     path("api/auth/", include("accounts.urls")),
     
-    # Added by AI - Namespace endpoints
+    # Namespace endpoints
     path("api/namespaces/", include("namespace.urls")),
 
-    # Added by AI - New Financial Apps
+    # New Financial Apps
     path("api/accountsb/", include("accountsb.urls")),
     path("api/conversion-rates/", include("conversion_rates.urls")),
     path("api/transactions/", include("transactions.urls")),

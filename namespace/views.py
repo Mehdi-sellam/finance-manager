@@ -1,4 +1,3 @@
-# Added by AI - namespace/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -14,7 +13,6 @@ from .serializers import (
 )
 
 
-# Added by AI - Create namespace view
 class CreateNamespaceView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -29,31 +27,24 @@ class CreateNamespaceView(APIView):
         security=[{"Token": []}],
     )
     def post(self, request):
-        # Added by AI - Validate input data using serializer
         serializer = NamespaceCreateSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Call service to create namespace (business logic in services.py)
                 namespace = create_namespace(request.user, **serializer.validated_data)
             except Exception as e:
-                # Added by AI - Handle business logic errors from service layer
                 return Response(
                     {"error": str(e)},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            # Added by AI - Serialize response data
             data = NamespaceSerializer(namespace).data
             
-            # Added by AI - Return successful response
             return Response(
                 data,
                 status=status.HTTP_201_CREATED
             )
-        # Added by AI - Return validation errors from serializer
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - List namespaces view
 class ListNamespacesView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -68,25 +59,20 @@ class ListNamespacesView(APIView):
     )
     def get(self, request):
         try:
-            # Added by AI - Call service to list namespaces (business logic in services.py)
             namespaces = list_namespaces(request.user)
         except Exception as e:
-            # Added by AI - Handle business logic errors from service layer
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        # Added by AI - Serialize response data
         data = NamespaceSerializer(namespaces, many=True).data
         
-        # Added by AI - Return successful response
         return Response(
             data,
             status=status.HTTP_200_OK
         )
 
 
-# Added by AI - Retrieve namespace view by ID
 class RetrieveNamespaceView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -101,25 +87,20 @@ class RetrieveNamespaceView(APIView):
     )
     def get(self, request, pk):
         try:
-            # Added by AI - Call service to get namespace (business logic in services.py)
             namespace = get_namespace(request.user, pk)
         except Exception as e:
-            # Added by AI - Handle business logic errors from service layer
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_404_NOT_FOUND
             )
-        # Added by AI - Serialize response data
         data = NamespaceSerializer(namespace).data
         
-        # Added by AI - Return successful response
         return Response(
             data,
             status=status.HTTP_200_OK
         )
 
 
-# Added by AI - Retrieve namespace view by name
 class RetrieveNamespaceByNameView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -142,10 +123,8 @@ class RetrieveNamespaceByNameView(APIView):
         security=[{"Token": []}],
     )
     def get(self, request):
-        # Added by AI - Get name from query parameters
         name = request.query_params.get("name")
         
-        # Added by AI - Validate that name is provided (query parameter validation)
         if not name:
             return Response(
                 {"error": "Name query parameter is required"},
@@ -153,25 +132,20 @@ class RetrieveNamespaceByNameView(APIView):
             )
         
         try:
-            # Added by AI - Call service to get namespace by name (business logic in services.py)
             namespace = get_namespace_by_name(request.user, name)
         except Exception as e:
-            # Added by AI - Handle business logic errors from service layer
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_404_NOT_FOUND
             )
-        # Added by AI - Serialize response data
         data = NamespaceSerializer(namespace).data
         
-        # Added by AI - Return successful response
         return Response(
             data,
             status=status.HTTP_200_OK
         )
 
 
-# Added by AI - Update namespace view (uses name instead of ID)
 class UpdateNamespaceView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -186,36 +160,28 @@ class UpdateNamespaceView(APIView):
         security=[{"Token": []}],
     )
     def patch(self, request):
-        # Added by AI - Validate input data using serializer
         serializer = NamespaceUpdateSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Call service to update namespace (business logic in services.py)
-                # Pass current_name as parameter and new_name in data
                 namespace = update_namespace(
                     request.user, 
                     serializer.validated_data["current_name"],
                     new_name=serializer.validated_data["new_name"]
                 )
             except Exception as e:
-                # Added by AI - Handle business logic errors from service layer
                 return Response(
                     {"error": str(e)},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            # Added by AI - Serialize response data
             data = NamespaceSerializer(namespace).data
             
-            # Added by AI - Return successful response
             return Response(
                 data,
                 status=status.HTTP_200_OK
             )
-        # Added by AI - Return validation errors from serializer
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Added by AI - Delete namespace view (uses name instead of ID)
 class DeleteNamespaceView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -232,23 +198,18 @@ class DeleteNamespaceView(APIView):
         security=[{"Token": []}],
     )
     def delete(self, request):
-        # Added by AI - Validate input data using serializer
         serializer = NamespaceDeleteSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Added by AI - Call service to delete namespace (business logic in services.py)
                 delete_namespace(request.user, serializer.validated_data["name"])
             except Exception as e:
-                # Added by AI - Handle business logic errors from service layer
                 return Response(
                     {"error": str(e)},
                     status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Added by AI - Return successful response
             return Response(
                 {"message": "Namespace deleted successfully"},
                 status=status.HTTP_200_OK
             )
-        # Added by AI - Return validation errors from serializer
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

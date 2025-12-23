@@ -4,6 +4,5 @@ from .views import ChangePasseordView, CreateUserView, LoginView
 urlpatterns = [
     path("create-user/", CreateUserView.as_view()),
     path("change-password/", ChangePasseordView.as_view()),
-    # Added by AI - Login endpoint URL pattern
     path("login/", LoginView.as_view()),
 ]
