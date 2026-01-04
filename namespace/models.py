@@ -1,12 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from common.models import TimeStampedModel
 
 
-class Namespace(models.Model):
-    name = models.CharField(max_length=255, unique=False)
+class Namespace(TimeStampedModel):
+    name = models.CharField(max_length=50, unique=False)  # Name can be duplicate across users
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="namespaces")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         unique_together = [['name', 'user']]

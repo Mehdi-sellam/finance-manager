@@ -1,10 +1,9 @@
-# accounts/serializers.py
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=4)
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(required=True, min_length=4)
     email = serializers.EmailField(required=True)
     
     class Meta:
@@ -18,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email"]  # Removed password field for security
+        fields = ["username", "email"]
 
 
 
@@ -34,13 +33,14 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
 
 
 class UserChangePasswordResponseSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(read_only=True)  # This will show the hashed password
+    password = serializers.CharField(read_only=True)
     
     class Meta:
         model = User
         fields = ["username", "password"]  
 
 
+        
 
 
 class UserLoginSerializer(serializers.Serializer):

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from namespace.models import Namespace
+from common.models import TimeStampedModel
 
 
 class Currency(models.TextChoices):
@@ -9,17 +10,12 @@ class Currency(models.TextChoices):
     DZD = 'DZD', 'DZD'
 
 
-class Account(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='financial_accounts')
-    
+class Account(TimeStampedModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='accounts')
     namespace = models.ForeignKey(Namespace, on_delete=models.CASCADE, related_name='accounts')
-    
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=50)
     currency = models.CharField(max_length=3, choices=Currency.choices)
     balance = models.DecimalField(max_digits=19, decimal_places=2, default=0.00)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [

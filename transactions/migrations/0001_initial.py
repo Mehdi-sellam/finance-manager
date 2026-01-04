@@ -11,7 +11,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('accountsb', '0001_initial'),
-        ('conversion_rates', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -25,7 +24,6 @@ class Migration(migrations.Migration):
                 ('currency', models.CharField(choices=[('USD', 'USD'), ('EUR', 'EUR'), ('DZD', 'DZD')], max_length=3)),
                 ('description', models.TextField(blank=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('conversion_rate', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='conversion_rates.conversionrate')),
                 ('destination_account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='incoming_transactions', to='accountsb.account')),
                 ('source_account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='outgoing_transactions', to='accountsb.account')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to=settings.AUTH_USER_MODEL)),

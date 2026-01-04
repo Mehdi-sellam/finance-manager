@@ -11,18 +11,11 @@ class NamespaceCreateSerializer(serializers.ModelSerializer):
 
 
 class NamespaceUpdateSerializer(serializers.Serializer):
-    current_name = serializers.CharField(required=True, max_length=50)
     new_name = serializers.CharField(required=True, max_length=50)
 
 
-class NamespaceDeleteSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True, max_length=50)
-
-
 class NamespaceSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = Namespace
         fields = ["id", "name", "user", "created_at", "updated_at"]
         read_only_fields = ["id", "user", "created_at", "updated_at"]
-

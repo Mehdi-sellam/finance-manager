@@ -1,84 +1,65 @@
 from .models import Namespace
+from common.exceptions import NotFoundError, ConflictError, DomainValidationError
 
 
 def create_namespace(requester, **data):
     name = data.get("name")
-    
     if not name:
-        raise ValueError("Name is required")
-    
+        raise DomainValidationError("Name is required")
     if not name.strip():
-        raise ValueError("Name cannot be empty")
-    
+        raise DomainValidationError("Name cannot be empty")
     if len(name) > 50:
-        raise ValueError("Name cannot exceed 50 characters")
-    
-    if Namespace.objects.filter(name=name.strip(), user=requester).exists():
-        raise ValueError("A namespace with that name already exists for this user")
-    
+        raise DomainValidationError("Name cannot exceed 50 characters")
+    if requester.namespaces.filter(name=name.strip()).exists():
+        raise ConflictError("A namespace with that name already exists for this user")
     namespace = Namespace.objects.create(
         name=name.strip(),
         user=requester
     )
-    
     return namespace
 
 
 def get_namespace(requester, namespace_id):
     try:
-        namespace = Namespace.objects.get(id=namespace_id)
+        namespace = requester.namespaces.get(id=namespace_id)
     except Namespace.DoesNotExist:
-        raise ValueError("Namespace not found")
-    
-    if namespace.user != requester:
-        raise ValueError("You do not have permission to access this namespace")
-    
+        raise NotFoundError("Namespace not found")
     return namespace
 
 
 def get_namespace_by_name(requester, name):
     if not name:
-        raise ValueError("Name is required")
-    
+        raise DomainValidationError("Name is required")
     if not name.strip():
-        raise ValueError("Name cannot be empty")
-    
+        raise DomainValidationError("Name cannot be empty")
     try:
-        namespace = Namespace.objects.get(name=name.strip(), user=requester)
+        namespace = requester.namespaces.get(name=name.strip())
     except Namespace.DoesNotExist:
-        raise ValueError("Namespace not found")
-    
+        raise NotFoundError("Namespace not found")
     return namespace
 
 
 def list_namespaces(requester):
-    return Namespace.objects.filter(user=requester)
+    return requester.namespaces.all()
 
 
-def update_namespace(requester, current_name, **data):
+def update_namespace(requester, namespace_id, **data):
     new_name = data.get("new_name")
-    
-    namespace = get_namespace_by_name(requester, current_name)
-    
+    namespace = get_namespace(requester, namespace_id)
     if not new_name:
-        raise ValueError("New name is required")
-    
+        raise DomainValidationError("New name is required")
     if not new_name.strip():
-        raise ValueError("Name cannot be empty")
-    
+        raise DomainValidationError("Name cannot be empty")
     if len(new_name) > 50:
-        raise ValueError("Name cannot exceed 50 characters")
-    
-    if Namespace.objects.filter(name=new_name.strip(), user=requester).exclude(id=namespace.id).exists():
-        raise ValueError("A namespace with that name already exists for this user")
-    
+        raise DomainValidationError("Name cannot exceed 50 characters")
+    if requester.namespaces.filter(name=new_name.strip()).exclude(id=namespace.id).exists():
+        raise ConflictError("A namespace with that name already exists for this user")
     namespace.name = new_name.strip()
     namespace.save()
-    
     return namespace
 
 
-def delete_namespace(requester, name):
-    namespace = get_namespace_by_name(requester, name)
+def delete_namespace(requester, namespace_id):
+    namespace = get_namespace(requester, namespace_id)
     namespace.delete()
-
+    return True

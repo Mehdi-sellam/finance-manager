@@ -1,32 +1,28 @@
 from django.db import transaction
-from accountsb.models import Account
-from accountsb.services import get_account_by_name
-from conversion_rates.models import ConversionRate
+from decimal import Decimal, ROUND_HALF_UP
+from accountsb.models import Account, Currency
 from .models import Transaction, TransactionType
+from common.exceptions import DomainValidationError, NotFoundError
 
 
-def create_in_transaction(user, destination_namespace_name, destination_account_name, amount, currency, description=""):
-    if not destination_namespace_name or not destination_namespace_name.strip():
-        raise ValueError("Destination namespace name is required")
-    if not destination_account_name or not destination_account_name.strip():
-        raise ValueError("Destination account name is required")
+def create_in_transaction(requester, account_id, amount, currency, description=""):
     if amount <= 0:
-        raise ValueError("Amount must be positive")
+        raise DomainValidationError("Amount must be positive")
         
     with transaction.atomic():
         try:
-            destination_account = get_account_by_name(user, destination_namespace_name, destination_account_name)
-        except ValueError as e:
-            raise ValueError(str(e))
+            destination_account = requester.accounts.get(id=account_id)
+        except Account.DoesNotExist:
+            raise NotFoundError(f"Account with ID {account_id} not found.")
         
         if destination_account.currency != currency:
-            raise ValueError(f"Account currency {destination_account.currency} does not match transaction currency {currency}")
+            raise DomainValidationError(f"Account currency {destination_account.currency} does not match transaction currency {currency}")
             
         destination_account.balance += amount
         destination_account.save()
         
         return Transaction.objects.create(
-            user=user,
+            user=requester,
             transaction_type=TransactionType.IN,
             amount=amount,
             currency=currency,
@@ -35,31 +31,27 @@ def create_in_transaction(user, destination_namespace_name, destination_account_
         )
 
 
-def create_out_transaction(user, source_namespace_name, source_account_name, amount, currency, description=""):
-    if not source_namespace_name or not source_namespace_name.strip():
-        raise ValueError("Source namespace name is required")
-    if not source_account_name or not source_account_name.strip():
-        raise ValueError("Source account name is required")
+def create_out_transaction(requester, account_id, amount, currency, description=""):
     if amount <= 0:
-        raise ValueError("Amount must be positive")
+        raise DomainValidationError("Amount must be positive")
 
     with transaction.atomic():
         try:
-            source_account = get_account_by_name(user, source_namespace_name, source_account_name)
-        except ValueError as e:
-            raise ValueError(str(e))
+            source_account = requester.accounts.get(id=account_id)
+        except Account.DoesNotExist:
+            raise NotFoundError(f"Account with ID {account_id} not found.")
         
         if source_account.currency != currency:
-            raise ValueError(f"Account currency {source_account.currency} does not match transaction currency {currency}")
+            raise DomainValidationError(f"Account currency {source_account.currency} does not match transaction currency {currency}")
             
         if source_account.balance < amount:
-            raise ValueError("Insufficient funds")
+            raise DomainValidationError("Insufficient funds")
             
         source_account.balance -= amount
         source_account.save()
         
         return Transaction.objects.create(
-            user=user,
+            user=requester,
             transaction_type=TransactionType.OUT,
             amount=amount,
             currency=currency,
@@ -68,99 +60,66 @@ def create_out_transaction(user, source_namespace_name, source_account_name, amo
         )
 
 
-def create_transfer_transaction(user, source_namespace_name, source_account_name, destination_namespace_name, destination_account_name, amount, description=""):
-    if not source_namespace_name or not source_namespace_name.strip():
-        raise ValueError("Source namespace name is required")
-    if not source_account_name or not source_account_name.strip():
-        raise ValueError("Source account name is required")
-    if not destination_namespace_name or not destination_namespace_name.strip():
-        raise ValueError("Destination namespace name is required")
-    if not destination_account_name or not destination_account_name.strip():
-        raise ValueError("Destination account name is required")
-    if amount <= 0:
-        raise ValueError("Amount must be positive")
+def create_transfer_transaction(requester, source_account_id, destination_account_id, source_amount, destination_amount, description=""):
+    if source_amount <= 0 or destination_amount <= 0:
+        raise DomainValidationError("Amounts must be positive")
+    
+    if source_account_id == destination_account_id:
+        raise DomainValidationError("Source and destination accounts must be different.")
 
     with transaction.atomic():
         try:
-            source_account = get_account_by_name(user, source_namespace_name, source_account_name)
-        except ValueError as e:
-            raise ValueError(str(e))
+            source_account = requester.accounts.get(id=source_account_id)
+        except Account.DoesNotExist:
+            raise NotFoundError(f"Source account with ID {source_account_id} not found.")
             
         try:
-            destination_account = get_account_by_name(user, destination_namespace_name, destination_account_name)
-        except ValueError as e:
-            raise ValueError(str(e))
+            destination_account = requester.accounts.get(id=destination_account_id)
+        except Account.DoesNotExist:
+            raise NotFoundError(f"Destination account with ID {destination_account_id} not found.")
         
-        if source_account.balance < amount:
-            raise ValueError("Insufficient funds in source account")
+        if source_account.balance < source_amount:
+            raise DomainValidationError("Insufficient funds in source account")
             
+        source_currency_rate = 1
+        destination_currency_rate = 1
+        
         if source_account.currency == destination_account.currency:
-            source_account.balance -= amount
-            source_account.save()
-            
-            destination_account.balance += amount
-            destination_account.save()
-            
-            return Transaction.objects.create(
-                user=user,
-                transaction_type=TransactionType.TRANSFER,
-                amount=amount,
-                currency=source_account.currency,
-                source_account=source_account,
-                destination_account=destination_account,
-                description=description
-            )
+            if source_amount != destination_amount:
+                raise DomainValidationError("Source and destination amounts must be equal for same-currency transfers")
         else:
-            try:
-                rate = ConversionRate.objects.get(
-                    user=user, 
-                    from_currency=source_account.currency, 
-                    to_currency=destination_account.currency
-                )
-            except ConversionRate.DoesNotExist:
-                raise ValueError(f"No conversion rate found from {source_account.currency} to {destination_account.currency}")
-                
-            converted_amount = amount * rate.rate
+            source_currency_rate = Decimal(source_amount) / Decimal(destination_amount)
+            destination_currency_rate = Decimal(destination_amount) / Decimal(source_amount)
+
+            if source_account.currency in {Currency.USD, Currency.EUR} or destination_account.currency in {Currency.USD, Currency.EUR}:
+                source_currency_rate = source_currency_rate.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
+                destination_currency_rate = destination_currency_rate.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
             
-            source_account.balance -= amount
-            source_account.save()
-            
-            destination_account.balance += converted_amount
-            destination_account.save()
-            
-            return Transaction.objects.create(
-                user=user,
-                transaction_type=TransactionType.TRANSFER,
-                amount=amount,
-                currency=source_account.currency,
-                source_account=source_account,
-                destination_account=destination_account,
-                conversion_rate=rate,
-                description=description
-            )
-
-
-def list_transactions(user):
-    return Transaction.objects.filter(user=user)
-
-
-def list_transactions_by_account(user, namespace_name, account_name):
-    if not namespace_name or not namespace_name.strip():
-        raise ValueError("Namespace name is required")
-    if not account_name or not account_name.strip():
-        raise ValueError("Account name is required")
+        source_account.balance -= source_amount
+        source_account.save()
         
-    try:
-        account = get_account_by_name(user, namespace_name, account_name)
-    except ValueError as e:
-        raise ValueError(str(e))
+        destination_account.balance += destination_amount
+        destination_account.save()
         
-    return Transaction.objects.filter(
-        user=user
-    ).filter(
-        models.Q(source_account=account) | models.Q(destination_account=account)
-    )
+        return Transaction.objects.create(
+            user=requester,
+            transaction_type=TransactionType.TRANSFER,
+            amount=source_amount,
+            destination_amount=destination_amount,
+            currency=source_account.currency, # Transaction currency is typically source currency
+            source_currency_rate=source_currency_rate,
+            destination_currency_rate=destination_currency_rate,
+            source_account=source_account,
+            destination_account=destination_account,
+            description=description
+        )
 
-
-def list_transactions_by_type(user, transaction_type):
-    return Transaction.objects.filter(user=user, transaction_type=transaction_type)
+def list_transactions(requester, transaction_type=None, account_id=None):
+    qs = requester.transactions.all()
+    if transaction_type:
+        qs = qs.filter(transaction_type=transaction_type)
+    if account_id:
+        # Filter where account is source OR destination
+        from django.db.models import Q
+        qs = qs.filter(Q(source_account_id=account_id) | Q(destination_account_id=account_id))
+    return qs.order_by('-created_at')

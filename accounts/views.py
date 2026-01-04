@@ -29,20 +29,10 @@ class CreateUserView(APIView):
         security=[{"Token": []}],
     )
     def post(self, request):
-        print(request.user)
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                user = create_user(request.user, **serializer.validated_data)
-            except Exception as e:
-                return Response(
-                    {"error": str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            user = create_user(request.user, **serializer.validated_data)
             data = UserSerializer(user).data
-            print(type(user))
-            print(type(data))
-            
             return Response(
                 data,
                 status=status.HTTP_201_CREATED
@@ -75,15 +65,8 @@ class ChangePasseordView(APIView):
     def patch(self, request):
         serializer = UserChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                user = change_password(request.user, **serializer.validated_data)
-            except Exception as e:
-                return Response(
-                    {"error": str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            user = change_password(request.user, **serializer.validated_data)
             data = UserChangePasswordResponseSerializer(user).data
-            
             return Response(
                 {
                     "message": "Password changed successfully",
@@ -114,19 +97,11 @@ class LoginView(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                result = login_user(**serializer.validated_data)
-            except Exception as e:
-                return Response(
-                    {"error": str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
+            result = login_user(**serializer.validated_data)
             response_data = {
                 "token": result["token"],
                 "username": result["user"].username
             }
-            
             return Response(
                 response_data,
                 status=status.HTTP_200_OK

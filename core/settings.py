@@ -46,13 +46,13 @@ INSTALLED_APPS = [
     'drf_yasg', 
     'django_filters',
     'rest_framework.authtoken',
+    'common',
  
 
     # your apps
     'accounts',
     'namespace',
     'accountsb',
-    'conversion_rates',
     'transactions',
 
 ]
