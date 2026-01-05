@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts</title>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+</head>
+<body>
+    <h1>Accounts</h1>
+    {% if username %}
+        <p>Signed in as {{ username }} | <a href="{% url 'logout' %}">Logout</a></p>
+    {% endif %}
+    <h2>Filter by Namespace</h2>
+    <select id="namespace-select" name="namespace_id">
+        <option value="">All namespaces</option>
+        {% for ns in namespaces %}
+            <option value="{{ ns.id }}" {% if selected_namespace_id == ns.id %}selected{% endif %}>{{ ns.name }}</option>
+        {% endfor %}
+    </select>
+    <p><small>Use this to scope accounts by namespace.</small></p>
+    {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h2>Create account</h2>
+    <form method="post" id="account-create-form">
+        {% csrf_token %}
+        {{ create_form.as_p }}
+        <button type="submit">Create</button>
+    </form>
+
+    <h2>Existing accounts</h2>
+    {% if selected_namespace_id %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Currency</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for acc in accounts %}
+                <tr>
+                    <td><a href="{% url 'account-detail' acc.id %}">{{ acc.name }}</a></td>
+                    <td>{{ acc.currency }}</td>
+                    <td>{{ acc.balance }}</td>
+                    <td>
+                        <a href="{% url 'account-detail' acc.id %}">Update</a>
+                        <form method="post" action="{% url 'account-detail' acc.id %}" style="display:inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4">No accounts found</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        {% for ns_name, accs in grouped_accounts.items %}
+            <h3>{{ ns_name }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Currency</th>
+                        <th>Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for acc in accs %}
+                    <tr>
+                        <td><a href="{% url 'account-detail' acc.id %}">{{ acc.name }}</a></td>
+                        <td>{{ acc.currency }}</td>
+                        <td>{{ acc.balance }}</td>
+                        <td>
+                            <a href="{% url 'account-detail' acc.id %}">Update</a>
+                            <form method="post" action="{% url 'account-detail' acc.id %}" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% empty %}
+            <p>No accounts found</p>
+        {% endfor %}
+    {% endif %}
+
+    <script>
+    var _msgs = [];
+    {% if messages %}{% for message in messages %}
+      _msgs.push({ text: "{{ message|escapejs }}", tags: "{{ message.tags }}" });
+    {% endfor %}{% endif %}
+    </script>
+
+    <p><a href="{% url 'namespaces' %}">Namespaces</a></p>
+    <p><a href="{% url 'transactions' %}">Transactions</a></p>
+    <p><a href="{% url 'index' %}">Home</a></p>
+    <script>
+    (function(){
+      var sel = document.getElementById('namespace-select');
+      if(sel){
+        sel.addEventListener('change', function(){
+          var v = sel.value;
+          var url = new URL(window.location.href);
+          if(v){ url.searchParams.set('namespace_id', v); }
+          else { url.searchParams.delete('namespace_id'); }
+          window.location.href = url.toString();
+        });
+      }
+    })();
+    </script>
+</body>
+<script src="{% static 'js/script.js' %}"></script>
+</html>

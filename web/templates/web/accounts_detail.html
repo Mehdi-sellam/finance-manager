@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+</head>
+<body>
+    <h1>Account</h1>
+    {% if username %}
+        <p>Signed in as {{ username }} | <a href="{% url 'logout' %}">Logout</a></p>
+    {% endif %}
+    <script>
+    var _msgs = [];
+    {% if messages %}{% for message in messages %}
+      _msgs.push({ text: "{{ message|escapejs }}", tags: "{{ message.tags }}" });
+    {% endfor %}{% endif %}
+    </script>
+
+    {% if account %}
+        <h2>Account Details</h2>
+        <table>
+            <tbody>
+                <tr><th>Name</th><td>{{ account.name }}</td></tr>
+                {% if account.currency %}<tr><th>Currency</th><td>{{ account.currency }}</td></tr>{% endif %}
+                {% if account.balance %}<tr><th>Balance</th><td>{{ account.balance }}</td></tr>{% endif %}
+                {% if account.namespace %}<tr><th>Namespace</th><td>{{ account.namespace }}</td></tr>{% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <h2>Update</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update">
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+
+    <h2>Delete</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <button type="submit">Delete</button>
+    </form>
+
+    <h2>Related Transactions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transactions %}
+            <tr>
+                <td>{{ t.transaction_type }}</td>
+                <td>{{ t.amount }}</td>
+                <td>{{ t.currency }}</td>
+                <td>{{ t.source_account_name }}</td>
+                <td>{{ t.destination_account_name }}</td>
+                <td>{{ t.description }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No transactions found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><a href="{% url 'accounts' %}">Back to Accounts</a></p>
+    <p><a href="{% url 'transactions' %}">Transactions</a></p>
+    <p><a href="{% url 'index' %}">Home</a></p>
+</body>
+<script src="{% static 'js/script.js' %}"></script>
+</html>

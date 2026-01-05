@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create OUT Transaction</title>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+</head>
+<body>
+    <h1>Create OUT Transaction</h1>
+    {% if username %}
+        <p>Signed in as {{ username }} | <a href="{% url 'logout' %}">Logout</a></p>
+    {% endif %}
+    <script>
+    var _msgs = [];
+    {% if messages %}{% for message in messages %}
+      _msgs.push({ text: "{{ message|escapejs }}", tags: "{{ message.tags }}" });
+    {% endfor %}{% endif %}
+    </script>
+    <h2>Select Namespace</h2>
+    <select id="namespace-select">
+        <option value="">All namespaces</option>
+        {% for ns in namespaces %}
+            <option value="{{ ns.id }}" {% if selected_namespace_id == ns.id %}selected{% endif %}>{{ ns.name }}</option>
+        {% endfor %}
+    </select>
+    <p><small>Accounts list below filters by selected namespace.</small></p>
+    <form method="post" id="transaction-out-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create</button>
+    </form>
+    <p><a href="{% url 'transactions' %}">Back to Transactions</a></p>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

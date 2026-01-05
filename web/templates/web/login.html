@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+</head>
+<body>
+    <h1>Login</h1>
+    <script>
+    var _msgs = [];
+    {% if messages %}{% for message in messages %}
+      _msgs.push({ text: "{{ message|escapejs }}", tags: "{{ message.tags }}" });
+    {% endfor %}{% endif %}
+    </script>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign in</button>
+    </form>
+    <p><a href="{% url 'index' %}">Home</a></p>
+</body>
+<script src="{% static 'js/script.js' %}"></script>
+</html>

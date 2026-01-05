@@ -1,0 +1,41 @@
+html, body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+body { max-width: 780px; margin: 0 auto; padding: 20px; line-height: 1.5; }
+h1, h2, h3 { margin: 0 0 12px; }
+ul { padding-left: 18px; }
+
+/* Messages */
+ul li { margin: 4px 0; }
+.success { color: #0a7f28; }
+.error { color: #b00020; }
+
+/* Forms */
+form { margin: 16px 0; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+form p { margin: 8px 0; }
+input, select, button { padding: 8px; font-size: 14px; }
+button { background: #0052cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+button:hover { background: #003d99; }
+
+/* Lists */
+li { padding: 4px 0; }
+
+/* Layout helpers */
+.nav { margin: 12px 0; }
+.hint { color: #555; font-size: 12px; }
+
+.popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.popup-box { background: #fff; border-radius: 8px; max-width: 600px; width: 90%; padding: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+.popup-box ul { margin: 0; padding-left: 18px; }
+.popup-box button { margin-top: 12px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; background: #fff; }
+thead th { background: #f0f3f7; text-align: left; font-weight: 600; }
+th, td { border: 1px solid #e0e6ef; padding: 8px; }
+tbody tr:nth-child(odd) { background: #fafcff; }
+tbody tr:hover { background: #eef5ff; }
+
+td a { color: #0052cc; text-decoration: none; margin-right: 8px; }
+td a:hover { text-decoration: underline; }
+td form button { background: #b00020; }
+td form button:hover { background: #8c001a; }
+
+select#namespace-select, select#ns-switch-select { min-width: 220px; margin-bottom: 8px; }

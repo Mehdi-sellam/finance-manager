@@ -19,3 +19,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
         model = Namespace
         fields = ["id", "name", "user", "created_at", "updated_at"]
         read_only_fields = ["id", "user", "created_at", "updated_at"]
+
+
+class NamespaceDeleteSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True, max_length=50)

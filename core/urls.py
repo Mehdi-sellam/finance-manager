@@ -11,11 +11,11 @@ from rest_framework import permissions
 router = routers.DefaultRouter()
 
 
-# Added by AI - Custom schema generator to include Token Authentication security scheme
+# Custom schema generator to include Token Authentication security scheme
 class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-        # Added by AI - Add security definitions for Token Authentication
+        # Add security definitions for Token Authentication
         schema.security_definitions = {
             'Token': {
                 'type': 'apiKey',
@@ -28,7 +28,7 @@ class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
 
 
 # Swagger / OpenAPI schema
-# Added by AI - Configure schema with custom generator for Token Authentication
+# Configure schema with custom generator for Token Authentication
 schema_view = get_schema_view(
     openapi.Info(
         title="Finance Manager API",
@@ -65,4 +65,9 @@ urlpatterns = [
     # API documentation
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0)),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0)),
+
+
+
+    # Web routes
+    path('', include('web.urls')),
 ]
